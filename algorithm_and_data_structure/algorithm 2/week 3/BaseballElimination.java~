@@ -1,0 +1,144 @@
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
+import java.util.ArrayList;
+import java.util.HashMap;
+import edu.princeton.cs.algs4.FlowEdge;
+import edu.princeton.cs.algs4.FlowNetwork;
+import edu.princeton.cs.algs4.FordFulkerson;
+
+public class BaseballElimination {
+    private HashMap<String,Integer> w, r, l, id;
+    private int[][] g;
+    private int n;
+    private ArrayList<String> teams;
+    public BaseballElimination(String filename) {                   // create a baseball division from given filename in format specified below
+        if (filename == null) {
+	    throw new IllegalArgumentException("invalid filename");
+	} else {
+	    In in = new In(filename);
+	    n = in.readInt();
+	    g = new int[numberOfTeams()][numberOfTeams()];
+	    w = new HashMap<String,Integer>(numberOfTeams());
+	    l = new HashMap<String,Integer>(numberOfTeams());
+	    r = new HashMap<String,Integer>(numberOfTeams());
+	    id = new HashMap<String,Integer>(numberOfTeams());
+	    teams = new ArrayList<String>(numberOfTeams());
+	    for (int i = 0; i < numberOfTeams(); i++) {
+		teams.add(in.readString());
+		w.put(teams.get(i),new Integer(in.readInt()));
+		l.put(teams.get(i),new Integer(in.readInt()));
+		r.put(teams.get(i),new Integer(in.readInt()));
+		id.put(teams.get(i),new Integer(i));
+		for (int j = 0; j < numberOfTeams(); j++) {
+		    g[i][j] = in.readInt();
+		}
+	    }
+	}
+    }
+    public              int numberOfTeams() {                       // number of teams
+        return n;
+    }
+    public Iterable<String> teams() {                               // all teams
+        return teams;
+    }
+    public              int wins(String team) {                     // number of wins for given team
+	if (team == null || w.get(team) == null) {
+	    throw new IllegalArgumentException("invalid team");
+	} else {
+	    return w.get(team).intValue();
+	}
+    }
+    public              int losses(String team) {                   // number of losses for given team
+	if (team == null || l.get(team) == null) {
+	    throw new IllegalArgumentException("invalid team");
+	} else {
+	    return l.get(team).intValue();
+	}
+    }
+    public              int remaining(String team) {                // number of remaining games for given team
+	if (team == null || r.get(team) == null) {
+	    throw new IllegalArgumentException("invalid team");
+	} else {
+	    return r.get(team).intValue();
+	}
+    }
+    public              int against(String team1, String team2) {   // number of remaining games between team1 and team2
+	if (team1 == null || team2 == null || id.get(team1) == null || id.get(team2) == null) {
+	    throw new IllegalArgumentException("invalid team");
+	} else {
+	    return g[id.get(team1).intValue()][id.get(team2).intValue()];
+	}
+    }
+    public          boolean isEliminated(String team) {             // is given team eliminated?
+	if (team == null || id.get(team) == null) {
+	    throw new IllegalArgumentException("invalid team");
+	} else if (trivial_elimination(team)) {
+	    return true;
+	} else {
+	    FlowNetwork G = new FlowNetwork(numberOfTeams()*numberOfTeams()+1);
+	    int sum = 0;
+	    for (int i = 0, m = 0; i < numberOfTeams(); i++) {
+		for (int j = i+1; j < numberOfTeams(); j++) {
+		    if (i != id.get(team).intValue() && j != id.get(team).intValue()) {
+			G.addEdge(new FlowEdge(numberOfTeams()*numberOfTeams()-1,m,new Double(g[i][j]).doubleValue()));
+			sum += g[i][j];
+			G.addEdge(new FlowEdge(m,numberOfTeams()*(numberOfTeams()-1)+i,Double.POSITIVE_INFINITY));
+			G.addEdge(new FlowEdge(m,numberOfTeams()*(numberOfTeams()-1)+j,Double.POSITIVE_INFINITY));
+			m += 1;
+		    }
+		}
+	    }
+	    int i;
+	    for (i = 0; i < numberOfTeams() && !eams.get(i).equals(team); i++) {
+		G.addEdge(new FlowEdge(numberOfTeams()*(numberOfTeams()-1)+m,numberOfTeams()*numberOfTeams(),w.get(team).doubleValue()+r.get(team).doubleValue()-w.get(teams.get(m)).doubleValue()));
+	    }
+	    return sum != new Double(new FordFulkerson(G,numberOfTeams()*numberOfTeams()-1,numberOfTeams()*numberOfTeams()).value()).intValue();
+	}
+    }
+    public Iterable<String> certificateOfElimination(String team) { // subset R of teams that eliminates given team; null if not eliminated
+	if (team == null || id.get(team) == null) {
+	    throw new IllegalArgumentException("invalid team");
+	} else if (isEliminated(team)) {
+	    ArrayList<String> R;
+	    for (String team_name : teams()) {
+		if (!team_name.equals(team) && w.get(team).intValue()+r.get(team).intValue() < w.get(team_name).intValue()) {
+		    R = new ArrayList<String>(1);
+		    R.add(team_name);
+		    return R;
+		}
+	    }
+	    R = new ArrayList<String>(numberOfTeams());
+	    for (int i = 0; i < numberOfTeams(); i++) {
+		if (!isEliminated(teams.get(i))) {
+		    R.add(teams.get(i));
+		}
+	    }
+	    return R;
+	} else {
+	    return null;
+	}
+    }
+    private boolean trivial_elimination(String team) {
+	for (String team_name : teams()) {
+	    if (!team_name.equals(team) && w.get(team).intValue()+r.get(team).intValue() < w.get(team_name).intValue()) {
+		return true;
+	    }
+	}
+	return false;
+    }
+    public static void main(String[] args) {
+	BaseballElimination division = new BaseballElimination(args[0]);
+	for (String team : division.teams()) {
+	    if (division.isEliminated(team)) {
+		StdOut.print(team + " is eliminated by the subset R = { ");
+		for (String t : division.certificateOfElimination(team)) {
+		    StdOut.print(t + " ");
+		}
+		StdOut.println("}");
+	    }
+	    else {
+		StdOut.println(team + " is not eliminated");
+	    }
+	}
+    }
+}

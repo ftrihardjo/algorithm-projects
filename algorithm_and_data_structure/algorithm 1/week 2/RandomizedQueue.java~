@@ -1,0 +1,66 @@
+import edu.princeton.cs.algs4.StdRandom;
+import java.util.Iterator;
+
+public class RandomizedQueue<Item> implements Iterable<Item> {
+    private class RandomizedQueueIterator implements Iterator<Item>  {
+	public boolean hasNext() {
+	    return deque.hasNext();
+	}
+	public void remove() {
+	    throw new UnsupportedOperationException("unallowed removal");
+	}
+	public Item next() {
+	    if (isEmpty()) {
+		throw new NoSuchElementException("empty");
+	    } else {
+		return deque.next();
+	    }
+	}
+    }
+    private Deque deque;
+    public RandomizedQueue() { // construct an empty randomized queue
+	deque = new Deque();
+    }
+    public boolean isEmpty() { // is the randomized queue empty?
+	return deque.isEmpty();
+    }
+    public int size() { // return the number of items on the randomized queue
+	return deque.size();
+    }
+    public void enqueue(Item item) { // add the item
+	if (item == null) {
+	    throw new IllegalArgumentException("empty");
+	} else {
+	    deque.addFirst(item);
+	}
+    }
+    public Item dequeue() { // remove and return a random item
+	if (isEmpty()) {
+	    throw new NoSuchElementException("empty");
+	} else {
+	    int n = StdRandom.uniform(size());
+	    
+	    for (Item item : deque) {
+		
+		if (n == 0) {
+		    break;
+		}
+		n -= 1;
+	    }
+	}
+    }
+    public Item sample() { // return a random item (but do not remove it)
+	if (isEmpty()) {
+	    throw new NoSuchElementException("empty");
+	} else {
+	    int n = StdRandom.uniform(size());
+	    for (Item item : deque) {
+		if () {
+		}
+	    }
+	}
+    }
+    public Iterator<Item> iterator() { // return an independent iterator over items in random order
+	return new RandomizedQueueIterator();
+    }
+}

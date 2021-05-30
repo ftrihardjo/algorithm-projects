@@ -1,0 +1,85 @@
+public class Board {
+    private int[][] board;
+    private int n, row, column, Hamming, Manhattan;
+    public Board(int[][] blocks) { // construct a board from an n-by-n array of blocks
+    // (where blocks[i][j] = block in row i, column j)
+	n = blocks[0].length;
+        Hamming = 0;
+	Manhattan = 0;
+	board = blocks;
+	for (int i = 0; i < n; i++) {
+	    for (int j = 0; j < n; j++) {
+		if (blocks[i][j] != 0) {
+		    if (i*n+j+1 != blocks[i][j]) {
+			Hamming += 1;
+		    }
+		    if (i != blocks[i][j]/n || j != blocks[i][j]%n-1) {
+			Manhattan += Math.abs(i-blocks[i][j]/n)+Math.abs(j-blocks[i][j]%n+1);
+		    }
+		} else {
+		    row = i;
+		    column = j;
+		}
+	    }
+	}
+    }
+    public int dimension() { // board dimension n
+	return n;
+    }
+    public int hamming() { // number of blocks out of place
+	return Hamming;
+    }
+    public int manhattan() { // sum of Manhattan distances between blocks and goal
+	return Manhattan;
+    }
+    public boolean isGoal() { // is this board the goal board?
+	return manhattan() == 0 || hamming() == 0;
+    }
+    public Board twin() { // a board that is obtained by exchanging any pair of blocks
+	int[][] blocks = new int[n][n];
+	for (int i = 0; i < n; i++) {
+	    for (int j = 0; j < n; j++) {
+		blocks[i][j] = board[i][j];
+	    }
+	}
+	if (row > 0) {	    
+	    int m = blocks[row][column];
+	    blocks[row][column] = blocks[row+1][column];
+	    blocks[row+1][column] = m;
+	    return new Board(blocks);
+	}
+	if (row < n-1) {
+	    int m = board[row][column];
+	    board[row][column] = board[row-1][column];
+	    board[row-1][column] = m;
+	    return new Board(board);
+	}
+	if (column > 0) {
+	    int m = blocks[row][column];
+	    blocks[row][column] = blocks[row][column+1];
+	    blocks[row][column+1] = m;
+	    return new Board(blocks);
+	}
+	if (column < n-1) {
+	    int m = blocks[row][column];
+	    blocks[row][column] = blocks[row][column-1];
+	    blocks[row][column-1] = m;
+	    return new Board(blocks);
+	}
+    }
+    public boolean equals(Object y) { // does this board equal y?
+	Board x = (Board)y;
+	for (int i = 0; i < n; i++) {
+	    for (int j = 0; j < n; j++) {
+		if (board[i][j] != x[i][j]) {
+		    return false;
+		}
+	    }
+	}
+	return true;
+    }
+    public Iterable<Board> neighbors() { // all neighboring boards
+    }
+    public String toString() { // string representation of this board (in the output format specified below)
+    }
+}

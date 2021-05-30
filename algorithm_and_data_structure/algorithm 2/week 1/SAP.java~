@@ -1,0 +1,63 @@
+import edu.princeton.cs.algs4.Digraph;
+
+public class SAP {
+    Digraph G;
+    // constructor takes a digraph (not necessarily a DAG)
+    public SAP(Digraph G) {
+	if (G == null) {
+	    throw new IllegalArgumentException("no graph");
+	} else {
+	    this.G = G;
+	}
+    }
+    // length of shortest ancestral path between v and w; -1 if no such path
+    public int length(int v, int w) {
+	
+    }
+    // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
+    public int ancestor(int v, int w) {
+	
+    }
+    // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
+    public int length(Iterable<Integer> v, Iterable<Integer> w) {
+        if (v == null || w == null || invalid_vertices(v) || invalid_vertices(w)) {
+	    throw new IllegalArgumentException("empty sets");
+	} else {
+	    int shortest_path = -1, d;
+	    for (Integer V : v) {
+		for (Integer W : w) {
+		    d = length(V.intValue(),W.intValue());
+		    if (d != -1 && (d < shortest_path || shortest_path == -1)) {
+			shortest_path = d;
+		    }
+		}
+	    }
+	    return shortest_path;
+	}
+    }
+    // a common ancestor that participates in shortest ancestral path; -1 if no such path
+    public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
+	if (v == null || w == null || invalid_vertices(v) || invalid_vertices(w)) {
+	    throw new IllegalArgumentException("empty sets");
+	} else {
+	    int shortest_path = -1, d;
+	    for (Integer V : v) {
+		for (Integer W : w) {
+		    d = ancestor(V.intValue(),W.intValue());
+		    if (d != -1 && (d < shortest_path || shortest_path == -1)) {
+			shortest_path = d;
+		    }
+		}
+	    }
+	    return shortest_path;
+	}
+    }
+    private boolean invalid_vertices(Iterable<Integer> v) {
+	for (Integer w : v) {
+	    if (w == null || w.intValue() >= G.V()) {
+		return true;
+	    }
+	}
+	return false;
+    }
+}

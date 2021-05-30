@@ -1,0 +1,74 @@
+import edu.princeton.cs.algs4.Topological;
+import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.RedBlackBST;
+
+public class WordNet {
+    private Digraph G;
+    private Topological T;
+    private RedBlackBST<String,Integer> RB1;
+    private RedBlackBST<Integer,String> RB2;
+    private SAP S;
+    private class Synset {
+	
+    }
+    // constructor takes the name of the two input files
+    public WordNet(String synsets, String hypernyms) {
+	if (synets == null || hypernyms == null) {
+	    throw new IllegalArgumentException("invalid files");
+	} else {
+	    int vertices;
+	    In in = new In(synsets);
+	    RB1 = new RedBlackBST<String,Integer>();
+	    RB2 = new RedBlackBST<Integer,String>();
+	    for (vertices = 0; in.hasNextLine(); vertices++) {
+		for (String s : in.readLine().split(",")[1].split(" ")) {
+		    RB1.put(s,new Integer(vertices));
+		    RB2.put(new Integer(vertices),s);
+		}
+	    }
+	    G = new Digraph(vertices);
+	    T = new Topological(G);	    
+	    if (T.hasOrder()) {
+		in = new In(hypernyms);
+		while (in.hasNextLine()) {
+		    String[] s = in.readLine().split(",");
+		    for (int i = 1; i < s.length; i++) {
+			G.addEdge(new Integer(s[0]).intValue(),new Integer(s[i]).intValue());
+		    }
+		}
+		S = new SAP(G);
+	    } else {
+		throw new IllegalArgumentException("invalid graph");
+	    }
+	}
+    }
+    // returns all WordNet nouns
+    public Iterable<String> nouns() {
+	return RB1.keys();
+    }
+    // is the word a WordNet noun?
+    public boolean isNoun(String word) {
+	if (word == null) {
+	    throw new IllegalArgumentException("invalid word");
+	} else {
+	    return RB1.contains(word);	    
+	}
+    }
+    // distance between nounA and nounB (defined below)
+    public int distance(String nounA, String nounB) {
+	if (nounA == null || nounB == null || !isNoun(nounA) || !isNoun(nounB)) {
+	    throw new IllegalArgumentException("invalid nouns");
+	} else {
+	    return S.length(RB1.get(nounA),RB1.get(nounB));
+	}
+    }
+    // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
+    // in a shortest ancestral path (defined below)
+    public String sap(String nounA, String nounB) {
+	if (nounA == null || nounB == null || !isNoun(nounA) || !isNoun(nounB)) {
+	    throw new IllegalArgumentException("invalid nouns");
+	} else {
+	    return RB2.get(S.ancestor(RB1.get(nounA),RB1.get(nounB)));
+	}
+    }
+}

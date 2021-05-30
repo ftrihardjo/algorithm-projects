@@ -1,0 +1,16 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+void colour_graph(int n, int d) {
+    
+}
+
+int main() {
+    int n, d;
+    cin >> n >> d;
+    cin.ignore();
+    return 0;
+}

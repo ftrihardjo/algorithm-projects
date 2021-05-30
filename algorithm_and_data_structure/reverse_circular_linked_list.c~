@@ -1,0 +1,34 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+typedef struct Node {
+    struct Node *node;
+    int n;
+};
+
+int main(int argc, char *argv[]) {
+    int i;
+    Node *node, *first, *last;
+    first = (Node*)malloc(sizeof(Node));
+    last = first;
+    last->n = 1;
+    last->next = last;
+    for (i = 2; i <= argv[argc]; i++) {
+	node = (Node*)malloc(sizeof(Node));
+	assert(node);
+	node->n = i;
+	last->next = node;
+	last = last->next;
+	last->next = first;
+    }
+    for (i = 1, node = last; i <= argv[argc]; i++) {
+	printf("%d ",node->n);
+	node = node->next;
+    }
+    for (i = 1, node = last; i <= argv[argc]; i++) {
+	last = last->next;
+	free(node);
+    }
+    return 0;
+}

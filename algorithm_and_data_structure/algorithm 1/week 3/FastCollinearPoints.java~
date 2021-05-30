@@ -1,0 +1,126 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
+
+public class FastCollinearPoints {
+    private ArrayList<LineSegment> line_segments;
+    public FastCollinearPoints(Point[] points) { // finds all line segments containing 4 or more points
+	ArrayList<Point> starts, ends;
+	boolean valid_points, duplicate, null_points;
+	int i, j, same;
+        Point start, end;
+	Point[] new_points = new Point[points.length-1];
+	starts = new ArrayList<Point>();
+        ends = new ArrayList<Point>();
+	for (i = 0, null_points = false; points != null && i < points.length && !null_points; i++) {
+	    if (points[i] == null) {
+	        null_points = true;
+	    }
+	}
+	for (i = 0, valid_points = true; points != null && i < points.length && valid_points; i++) {
+	    for (j = i+1; j < points.length && valid_points; j++) {
+		if (points[i].compareTo(points[j]) == 0) {
+		    valid_points = false;
+		}
+	    }
+	}
+	if (points != null && valid_points && !null_points) {	    
+	    for (i = 0; i < points.length && valid_points; i++) {
+		for (j = 0; j < points.length && points[j].compareTo(points[i]) != 0; j++) {
+		    new_points[j] = points[j];
+		}
+		for (j++; j < points.length; j++) {
+		    new_points[j-1] = points[j];
+		}
+		Arrays.sort(new_points,points[i].slopeOrder());
+		if (points[i].compareTo(new_points[0]) > 0) {
+		    end = points[i];
+		    start = new_points[0];
+		} else {
+		    end = new_points[0];
+		    start = points[i];
+		}
+		for (j = 1, same = 2; j < new_points.length; j++) {
+		    if (start.slopeTo(end) == start.slopeTo(new_points[j])) {
+			same += 1;
+			if (start.compareTo(new_points[j]) > 0) {
+			    start = new_points[j];
+		        }
+			if (end.compareTo(new_points[j]) < 0) {
+			    end = new_points[j];
+			}
+		    } else {
+			if (same >= 4) {
+			    starts.add(start);
+			    ends.add(end);
+			}
+		        if (points[i].compareTo(new_points[j]) > 0) {
+			    end = points[i];
+			    start = new_points[j];
+			} else {
+			    end = new_points[j];
+			    start = points[i];
+			}
+			same = 2;
+		    }
+		}
+		if (same >= 4) {
+		    starts.add(start);
+		    ends.add(end);
+		}
+	    }
+	    line_segments = new ArrayList<LineSegment>();
+	    if (starts.size() > 0) {
+		line_segments.add(new LineSegment(starts.get(0),ends.get(0)));
+		for (i = 1; i < starts.size(); i++) {
+		    for (j = 0, duplicate = false; j < i && !duplicate; j++) {
+			if (starts.get(i).compareTo(starts.get(j)) == 0 && ends.get(i).compareTo(ends.get(j)) == 0) {
+			    duplicate = true;
+			}
+		    }
+		    if (!duplicate) {
+			line_segments.add(new LineSegment(starts.get(i),ends.get(i)));
+		    }
+		}
+	    }
+	} else if (points == null) {
+	    throw new NullPointerException("no point");
+	} else {
+	    throw new IllegalArgumentException("invalid points");
+	}
+    }
+    public int numberOfSegments() { // the number of line segments
+	return line_segments.size();
+    }
+    public LineSegment[] segments() { // the line segments
+	return line_segments.toArray(new LineSegment[line_segments.size()]);
+    }
+    public static void main(String[] args) {
+	// read the n points from a file
+	In in = new In(args[0]);
+	int n = in.readInt();
+	Point[] points = new Point[n];
+	for (int i = 0; i < n; i++) {
+	    int x = in.readInt();
+	    int y = in.readInt();
+	    points[i] = new Point(x, y);
+	}
+	// draw the points
+	StdDraw.enableDoubleBuffering();
+	StdDraw.setXscale(0, 32768);
+	StdDraw.setYscale(0, 32768);
+	for (Point p : points) {
+	    p.draw();
+	}
+	StdDraw.show();
+	// print and draw the line segments
+	FastCollinearPoints collinear = new FastCollinearPoints(points);
+	for (LineSegment segment : collinear.segments()) {
+	    StdOut.println(segment);
+	    segment.draw();
+	}
+	StdDraw.show();
+    }
+}

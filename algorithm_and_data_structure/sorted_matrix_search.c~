@@ -1,0 +1,9 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int m, n;
+
+int main(int argc, char *argv[]) {
+    int x = atoi(argv[argc-1]);
+    return 0;
+}
